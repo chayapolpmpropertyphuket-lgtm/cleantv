@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.CleanTV" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <!-- ให้พื้นหลังขึ้นทันทีตั้งแต่เฟรมแรก -->
+        <item name="android:windowBackground">@drawable/bg_gradient</item>
+        <item name="android:windowShowWallpaper">false</item>
+    </style>
+</resources>
