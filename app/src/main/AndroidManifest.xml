@@ -4,6 +4,16 @@
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
+    <!-- ดาวน์โหลดรูปจากลิงก์ -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- อ่านรูปจากเครื่องหรือ USB -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- ปุ่มถอนการติดตั้งแอปในเมนูกดค้าง -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
@@ -20,6 +30,8 @@
         android:banner="@drawable/bg_gradient"
         android:icon="@drawable/ic_launcher"
         android:label="CleanTV"
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.CleanTV">
 
         <activity
@@ -38,5 +50,10 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
     </application>
 </manifest>
