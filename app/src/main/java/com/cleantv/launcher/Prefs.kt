@@ -42,6 +42,8 @@ class Prefs(context: Context) {
     var wallpaperMode by IntPref("wallpaper_mode", 0)   // 0 = ธีมสี, 1 = รูปภาพ
     var presetIndex by IntPref("preset", 0)
     var dimPercent by IntPref("dim", 30)
+    var heroSource by IntPref("hero_source", 0)         // 0 = ตามแอปที่เลือก, 1 = รูปพื้นหลังของฉัน
+
 
     // ---------- ส่วนหัว ----------
     var logoMode by IntPref("logo_mode", 1)             // 0 = ไม่แสดง, 1 = ข้อความ, 2 = รูปภาพ

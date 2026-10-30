@@ -98,6 +98,14 @@ class SettingsActivity : BaseActivity() {
 
     // ---------- รายการตั้งค่าทั้งหมด ----------
     private fun buildRows() {
+        section("หน้าหลักแบบ Google TV")
+        choice(
+            "ภาพด้านบน (Hero)",
+            listOf("เปลี่ยนตามแอปที่เลือก", "ใช้รูปพื้นหลังของฉันตลอด"),
+            listOf(0, 1),
+            { prefs.heroSource }
+        ) { prefs.heroSource = it }
+
         section("พื้นหลัง")
         choice("ประเภทพื้นหลัง", listOf("ธีมสี", "รูปภาพ"), listOf(0, 1), { prefs.wallpaperMode }) { v ->
             if (v == 1 && !ImageStore.exists(this, ImageStore.WALLPAPER)) {

@@ -1,21 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#0A0C10"
+    android:clipChildren="false">
 
+    <!-- ภาพ Hero มุมขวาบน -->
     <ImageView
-        android:id="@+id/wallpaper"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/heroArt"
+        android:layout_width="640dp"
+        android:layout_height="360dp"
+        android:layout_gravity="top|end"
+        android:alpha="0"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop" />
 
+    <!-- ไล่สีให้ขอบภาพจางเข้ากับพื้นหลัง (สีกำหนดในโค้ด) -->
     <View
-        android:id="@+id/dim"
+        android:id="@+id/fadeLeft"
+        android:layout_width="640dp"
+        android:layout_height="360dp"
+        android:layout_gravity="top|end" />
+
+    <View
+        android:id="@+id/fadeBottom"
+        android:layout_width="640dp"
+        android:layout_height="360dp"
+        android:layout_gravity="top|end" />
+
+    <View
+        android:id="@+id/fadeTop"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0"
-        android:background="#000000" />
+        android:layout_height="110dp"
+        android:layout_gravity="top" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,102 +41,214 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="vertical"
-        android:paddingStart="56dp"
-        android:paddingTop="36dp"
-        android:paddingEnd="56dp">
+        android:paddingTop="28dp">
 
+        <!-- แถบบน -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingStart="48dp"
+            android:paddingEnd="48dp">
 
-            <LinearLayout
-                android:layout_width="0dp"
+            <ImageView
+                android:id="@+id/logoImage"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginEnd="28dp"
+                android:adjustViewBounds="true"
+                android:importantForAccessibility="no"
+                android:maxWidth="200dp"
+                android:scaleType="fitStart"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/logoText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_marginEnd="28dp"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-                <ImageView
-                    android:id="@+id/logoImage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="56dp"
-                    android:adjustViewBounds="true"
-                    android:importantForAccessibility="no"
-                    android:maxWidth="360dp"
-                    android:scaleType="fitStart"
-                    android:visibility="gone" />
+            <TextView
+                android:id="@+id/tabHome"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/tab_bg"
+                android:focusable="true"
+                android:gravity="center"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="สำหรับคุณ"
+                android:textColor="@color/tab_text"
+                android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/logoText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#FFFFFF"
-                    android:textSize="32sp"
-                    android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tabAll"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/tab_bg"
+                android:focusable="true"
+                android:gravity="center"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="แอป"
+                android:textColor="@color/tab_text"
+                android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/greeting"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="#E5E7EB"
-                    android:textSize="20sp" />
-
-                <TextClock
-                    android:id="@+id/date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:format12Hour="EEEE d MMMM"
-                    android:format24Hour="EEEE d MMMM"
-                    android:textColor="#9CA3AF"
-                    android:textSize="15sp" />
-            </LinearLayout>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
 
             <TextClock
                 android:id="@+id/clock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="20dp"
                 android:fontFamily="sans-serif-light"
-                android:textColor="#FFFFFF"
-                android:textSize="44sp" />
+                android:textColor="#E5E7EB"
+                android:textSize="22sp" />
 
             <ImageButton
                 android:id="@+id/btnCustomize"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="@drawable/button_bg"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/icon_btn_bg"
                 android:contentDescription="ปรับแต่ง CleanTV"
                 android:focusable="true"
-                android:padding="14dp"
+                android:padding="11dp"
                 android:scaleType="fitCenter"
                 android:src="@android:drawable/ic_menu_edit"
-                android:tint="#FFFFFF" />
+                android:tint="@color/icon_tint" />
 
             <ImageButton
                 android:id="@+id/btnSystem"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_marginStart="12dp"
-                android:background="@drawable/button_bg"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/icon_btn_bg"
                 android:contentDescription="การตั้งค่าทีวี"
                 android:focusable="true"
-                android:padding="14dp"
+                android:padding="11dp"
                 android:scaleType="fitCenter"
                 android:src="@android:drawable/ic_menu_preferences"
-                android:tint="#FFFFFF" />
+                android:tint="@color/icon_tint" />
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/grid"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:clipChildren="false"
-            android:clipToPadding="false"
-            android:paddingTop="8dp"
-            android:paddingBottom="48dp" />
+            android:clipToPadding="false">
+
+            <!-- แท็บ "สำหรับคุณ" -->
+            <LinearLayout
+                android:id="@+id/pageHome"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/heroBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:paddingStart="48dp"
+                    android:paddingEnd="48dp">
+
+                    <TextView
+                        android:id="@+id/heroTag"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:letterSpacing="0.08"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/heroTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxWidth="640dp"
+                        android:maxLines="1"
+                        android:shadowColor="#99000000"
+                        android:shadowDy="2"
+                        android:shadowRadius="12"
+                        android:textColor="#FFFFFF"
+                        android:textSize="44sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/heroSub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="#B4BAC6"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/favTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="48dp"
+                    android:text="รายการโปรด"
+                    android:textColor="#D1D5DB"
+                    android:textSize="15sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rowFav"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:paddingStart="38dp"
+                    android:paddingEnd="38dp" />
+
+                <TextView
+                    android:id="@+id/appsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:paddingStart="48dp"
+                    android:text="แอปของคุณ"
+                    android:textColor="#D1D5DB"
+                    android:textSize="15sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rowApps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:paddingStart="38dp"
+                    android:paddingEnd="38dp" />
+            </LinearLayout>
+
+            <!-- แท็บ "แอป" -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/gridAll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:paddingStart="38dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="38dp"
+                android:paddingBottom="48dp"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 </FrameLayout>
