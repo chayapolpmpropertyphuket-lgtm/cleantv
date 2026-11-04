@@ -18,6 +18,8 @@ internal object UpdateSecurity {
         val uri = URI(value)
         uri.scheme.equals("https", ignoreCase = true) &&
             uri.host.equals("github.com", ignoreCase = true) &&
+            (uri.port == -1 || uri.port == 443) &&
+            uri.userInfo == null &&
             uri.path.orEmpty().startsWith("/chayapolpmpropertyphuket-lgtm/cleantv/releases/download/")
     } catch (_: Exception) {
         false
@@ -29,7 +31,10 @@ internal object UpdateSecurity {
         val trustedHost = host == "github.com" ||
             host == "release-assets.githubusercontent.com" ||
             host == "objects.githubusercontent.com"
-        uri.scheme.equals("https", ignoreCase = true) && trustedHost
+        uri.scheme.equals("https", ignoreCase = true) &&
+            trustedHost &&
+            (uri.port == -1 || uri.port == 443) &&
+            uri.userInfo == null
     } catch (_: Exception) {
         false
     }
