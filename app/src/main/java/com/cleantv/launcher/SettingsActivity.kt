@@ -225,6 +225,7 @@ class SettingsActivity : BaseActivity() {
         }
 
         section("ระบบ")
+        action("ตรวจสอบการอัปเดต CleanTV", { "เวอร์ชันปัจจุบัน ${versionName()}" }) { checkForUpdates() }
         action("เปิดการตั้งค่าของทีวี") { safeStart(Intent(Settings.ACTION_SETTINGS)) }
         action("ล้างชื่อและไอคอนที่กำหนดเองทั้งหมด") {
             confirm("ล้างชื่อและไอคอนที่เปลี่ยนไว้ทั้งหมด?") {
@@ -246,6 +247,26 @@ class SettingsActivity : BaseActivity() {
         }
         action("เกี่ยวกับ", { "CleanTV เวอร์ชัน ${versionName()}" }) {
             toast("CleanTV — Launcher ส่วนตัว ไม่มีโฆษณา ไม่เก็บข้อมูล")
+        }
+    }
+
+    private var updateCheckRunning = false
+
+    private fun checkForUpdates() {
+        if (updateCheckRunning) return
+        updateCheckRunning = true
+        toast("กำลังตรวจสอบเวอร์ชันล่าสุด...")
+        worker.execute {
+            val result = runCatching { UpdateManager.fetchLatest(this) }
+            main.post {
+                updateCheckRunning = false
+                val release = result.getOrNull()
+                when {
+                    release != null -> promptUpdate(release)
+                    result.isFailure -> toast("ตรวจสอบอัปเดตไม่สำเร็จ: ${result.exceptionOrNull()?.message ?: "เครือข่ายผิดพลาด"}")
+                    else -> toast("CleanTV เป็นเวอร์ชันล่าสุดแล้ว")
+                }
+            }
         }
     }
 

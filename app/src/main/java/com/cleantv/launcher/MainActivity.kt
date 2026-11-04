@@ -152,6 +152,8 @@ class MainActivity : BaseActivity() {
         applyAll()
     }
 
+    private var updateCheckRunning = false
+
     override fun onResume() {
         super.onResume()
         if (dirty) {
@@ -159,6 +161,25 @@ class MainActivity : BaseActivity() {
             applyAll()
         } else if (heroPkg == null) {
             showDefaultHero()
+        }
+        checkForUpdatesIfDue()
+    }
+
+    private fun checkForUpdatesIfDue() {
+        if (updateCheckRunning) return
+        val now = System.currentTimeMillis()
+        val last = prefs.sp.getLong("last_update_check", 0L)
+        if (now - last < 12L * 60L * 60L * 1000L) return
+
+        updateCheckRunning = true
+        worker.execute {
+            val result = runCatching { UpdateManager.fetchLatest(this) }
+            main.post {
+                updateCheckRunning = false
+                if (result.isSuccess) prefs.sp.edit().putLong("last_update_check", now).apply()
+                val release = result.getOrNull()
+                if (release != null && !isFinishing) promptUpdate(release)
+            }
         }
     }
 
