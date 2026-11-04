@@ -132,19 +132,10 @@ object UpdateManager {
         ) return target
         target.delete()
 
-        val connection = (URL(release.downloadUrl).openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
-            connectTimeout = 15000
-            readTimeout = 30000
-            instanceFollowRedirects = true
-            setRequestProperty("User-Agent", "CleanTV-Android-Updater")
-        }
+        val connection = openValidatedDownloadConnection(release.downloadUrl)
         try {
             if (connection.responseCode != HttpURLConnection.HTTP_OK) {
                 throw IOException("ดาวน์โหลด APK ไม่สำเร็จ: HTTP ${connection.responseCode}")
-            }
-            if (!UpdateSecurity.isAllowedRedirectUrl(connection.url.toString())) {
-                throw IOException("ปลายทางดาวน์โหลดไม่ผ่านการตรวจสอบความปลอดภัย")
             }
             val length = connection.contentLengthLong
             if (length > 0L && UpdateSecurity.exceedsMaxApkSize(length)) {
@@ -178,6 +169,41 @@ object UpdateManager {
             throw IOException("ตรวจสอบ SHA-256 ไม่ผ่าน ไฟล์อัปเดตถูกปฏิเสธ")
         }
         return target
+    }
+
+    private fun openValidatedDownloadConnection(startUrl: String): HttpURLConnection {
+        var currentUrl = URL(startUrl)
+        repeat(6) { redirectCount ->
+            if (!UpdateSecurity.isAllowedRedirectUrl(currentUrl.toString())) {
+                throw IOException("ปลายทางดาวน์โหลดไม่ผ่านการตรวจสอบความปลอดภัย")
+            }
+            val connection = (currentUrl.openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 15000
+                readTimeout = 30000
+                instanceFollowRedirects = false
+                setRequestProperty("User-Agent", "CleanTV-Android-Updater")
+            }
+            val status = try { connection.responseCode } catch (error: Throwable) {
+                connection.disconnect()
+                throw error
+            }
+            if (status in listOf(301, 302, 303, 307, 308)) {
+                val location = connection.getHeaderField("Location")
+                connection.disconnect()
+                if (location.isNullOrBlank() || redirectCount == 5) {
+                    throw IOException("ลิงก์ดาวน์โหลดเปลี่ยนเส้นทางไม่ถูกต้อง")
+                }
+                currentUrl = try {
+                    URL(currentUrl, location)
+                } catch (_: Exception) {
+                    throw IOException("ลิงก์เปลี่ยนเส้นทางไม่ถูกต้อง")
+                }
+            } else {
+                return connection
+            }
+        }
+        throw IOException("เปลี่ยนเส้นทางดาวน์โหลดเกินจำนวนที่อนุญาต")
     }
 
     private fun sha256(file: File): String {
