@@ -66,6 +66,10 @@ jobs:
           retention-days: 14
 
       - name: Build APK
+        env:
+          CLEANTV_STORE_PASSWORD: ${{ secrets.CLEANTV_STORE_PASSWORD }}
+          CLEANTV_KEY_ALIAS: ${{ secrets.CLEANTV_KEY_ALIAS }}
+          CLEANTV_KEY_PASSWORD: ${{ secrets.CLEANTV_KEY_PASSWORD }}
         run: gradle assembleRelease --no-daemon -PversionCode=${{ github.run_number }}
 
       - name: Verify APK signing certificate
