@@ -50,6 +50,8 @@ class UpdateSecurityTest {
         assertTrue(UpdateSecurity.isAllowedRedirectUrl("https://objects.githubusercontent.com/file.apk"))
         assertFalse(UpdateSecurity.isAllowedRedirectUrl("http://release-assets.githubusercontent.com/file.apk"))
         assertFalse(UpdateSecurity.isAllowedRedirectUrl("https://evil.example/file.apk"))
+        assertFalse(UpdateSecurity.isAllowedRedirectUrl("https://release-assets.githubusercontent.com:8443/file.apk"))
+        assertFalse(UpdateSecurity.isAllowedRedirectUrl("https://release-assets.githubusercontent.com@evil.example/file.apk"))
     }
 
     @Test fun apkSizeMustBePositiveAndAtMost100MiB() {
