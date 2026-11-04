@@ -107,7 +107,7 @@ object UpdateManager {
                     .setAction(ACTION_INSTALL_STATUS)
                     .putExtra(EXTRA_VERSION_CODE, release.versionCode)
                 val flags = android.app.PendingIntent.FLAG_UPDATE_CURRENT or
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) android.app.PendingIntent.FLAG_MUTABLE else 0
+                    (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) android.app.PendingIntent.FLAG_MUTABLE else 0)
                 val callback = android.app.PendingIntent.getBroadcast(context, sessionId, statusIntent, flags)
                 session.commit(callback.intentSender)
             }
