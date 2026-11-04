@@ -172,11 +172,11 @@ class MainActivity : BaseActivity() {
         if (now - last < 12L * 60L * 60L * 1000L) return
 
         updateCheckRunning = true
-        prefs.sp.edit().putLong("last_update_check", now).apply()
         worker.execute {
             val result = runCatching { UpdateManager.fetchLatest(this) }
             main.post {
                 updateCheckRunning = false
+                if (result.isSuccess) prefs.sp.edit().putLong("last_update_check", now).apply()
                 val release = result.getOrNull()
                 if (release != null && !isFinishing) promptUpdate(release)
             }
