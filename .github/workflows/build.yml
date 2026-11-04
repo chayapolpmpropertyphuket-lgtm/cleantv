@@ -32,15 +32,23 @@ jobs:
           gradle-version: '8.7'
           cache-provider: basic
 
-      # Keep the current signing identity until a tested key migration is planned.
-      - name: Load existing signing key
+      - name: Load CleanTV release signing key
+        env:
+          CLEANTV_KEYSTORE_BASE64: ${{ secrets.CLEANTV_KEYSTORE_BASE64 }}
+          CLEANTV_STORE_PASSWORD: ${{ secrets.CLEANTV_STORE_PASSWORD }}
+          CLEANTV_KEY_ALIAS: ${{ secrets.CLEANTV_KEY_ALIAS }}
+          CLEANTV_KEY_PASSWORD: ${{ secrets.CLEANTV_KEY_PASSWORD }}
         run: |
-          test -f keystore/debug.keystore || (echo "Missing existing signing key; refusing to create a different key" && exit 1)
-          # Fail early if the committed key or expected alias is unavailable.
-          keytool -list -v -keystore keystore/debug.keystore \
-            -storepass android -alias androiddebugkey
-          mkdir -p ~/.android
-          cp keystore/debug.keystore ~/.android/debug.keystore
+          set -euo pipefail
+          test -n "$CLEANTV_KEYSTORE_BASE64"
+          test -n "$CLEANTV_STORE_PASSWORD"
+          test -n "$CLEANTV_KEY_ALIAS"
+          test -n "$CLEANTV_KEY_PASSWORD"
+          mkdir -p keystore
+          umask 077
+          printf '%s' "$CLEANTV_KEYSTORE_BASE64" | base64 --decode > keystore/cleantv-release.jks
+          test -s keystore/cleantv-release.jks
+          keytool -list -keystore keystore/cleantv-release.jks -storepass "$CLEANTV_STORE_PASSWORD" -alias "$CLEANTV_KEY_ALIAS"
 
       - name: Run updater unit tests
         run: gradle testReleaseUnitTest --no-daemon -PversionCode=${{ github.run_number }}
@@ -59,6 +67,13 @@ jobs:
 
       - name: Build APK
         run: gradle assembleRelease --no-daemon -PversionCode=${{ github.run_number }}
+
+      - name: Verify APK signing certificate
+        run: |
+          apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          EXPECTED_SHA256="F459AFD2075ADCD9B62AFC1FC5ECA6FDED5CA079D8760BC5F17AEDFA98F1E57D"
+          ACTUAL_SHA256="$(apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk | awk -F': ' '/Signer #1 certificate SHA-256 digest:/ {print $2; exit}' | tr -d ':')"
+          test "$ACTUAL_SHA256" = "$EXPECTED_SHA256"
 
       - name: Rename APK
         run: cp app/build/outputs/apk/release/app-release.apk CleanTV.apk
