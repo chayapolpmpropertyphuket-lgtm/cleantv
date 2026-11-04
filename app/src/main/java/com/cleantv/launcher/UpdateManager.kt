@@ -23,7 +23,6 @@ object UpdateManager {
     private const val RELEASE_API =
         "https://api.github.com/repos/chayapolpmpropertyphuket-lgtm/cleantv/releases/latest"
     private const val APK_NAME = "CleanTV.apk"
-    private const val MAX_APK_SIZE = 100L * 1024L * 1024L
     const val ACTION_INSTALL_STATUS = "com.cleantv.launcher.UPDATE_INSTALL_STATUS"
     const val EXTRA_VERSION_CODE = "update_version_code"
 
@@ -44,7 +43,7 @@ object UpdateManager {
             if (release.optBoolean("draft", false) || release.optBoolean("prerelease", false)) return null
 
             val tag = release.optString("tag_name")
-            val remoteCode = Regex("^v?(\\d+)$").matchEntire(tag)?.groupValues?.get(1)?.toIntOrNull()
+            val remoteCode = UpdateSecurity.parseVersionCode(tag)
                 ?: throw IOException("รูปแบบ Release tag ไม่ถูกต้อง: $tag")
 
             val current = currentVersionCode(context)
@@ -61,13 +60,11 @@ object UpdateManager {
             }
             val asset = apkAsset ?: throw IOException("ไม่พบ CleanTV.apk ใน Release ล่าสุด")
             val url = asset.optString("browser_download_url")
-            if (!url.startsWith("https://github.com/chayapolpmpropertyphuket-lgtm/cleantv/releases/download/")) {
+            if (!UpdateSecurity.isAllowedReleaseUrl(url)) {
                 throw IOException("URL ดาวน์โหลด APK ไม่ผ่านการตรวจสอบ")
             }
-            val digest = asset.optString("digest").removePrefix("sha256:").lowercase()
-            if (!digest.matches(Regex("^[a-f0-9]{64}$"))) {
-                throw IOException("Release ไม่มี SHA-256 ที่ถูกต้อง")
-            }
+            val digest = UpdateSecurity.normalizeSha256(asset.optString("digest"))
+                ?: throw IOException("Release ไม่มี SHA-256 ที่ถูกต้อง")
 
             return UpdateRelease(
                 versionCode = remoteCode,
@@ -134,8 +131,13 @@ object UpdateManager {
             if (connection.responseCode != HttpURLConnection.HTTP_OK) {
                 throw IOException("ดาวน์โหลด APK ไม่สำเร็จ: HTTP ${connection.responseCode}")
             }
+            if (!UpdateSecurity.isAllowedRedirectUrl(connection.url.toString())) {
+                throw IOException("ปลายทางดาวน์โหลดไม่ผ่านการตรวจสอบความปลอดภัย")
+            }
             val length = connection.contentLengthLong
-            if (length > MAX_APK_SIZE) throw IOException("ไฟล์ APK ใหญ่เกินขนาดที่อนุญาต")
+            if (length > 0L && UpdateSecurity.exceedsMaxApkSize(length)) {
+                throw IOException("ไฟล์ APK ใหญ่เกินขนาดที่อนุญาต")
+            }
             connection.inputStream.use { input ->
                 FileOutputStream(target).use { output ->
                     val buffer = ByteArray(64 * 1024)
@@ -144,7 +146,9 @@ object UpdateManager {
                         val count = input.read(buffer)
                         if (count < 0) break
                         total += count
-                        if (total > MAX_APK_SIZE) throw IOException("ไฟล์ APK ใหญ่เกินขนาดที่อนุญาต")
+                        if (UpdateSecurity.exceedsMaxApkSize(total)) {
+                            throw IOException("ไฟล์ APK ใหญ่เกินขนาดที่อนุญาต")
+                        }
                         output.write(buffer, 0, count)
                     }
                     output.fd.sync()
@@ -157,7 +161,7 @@ object UpdateManager {
             connection.disconnect()
         }
 
-        if (target.length() <= 0L || sha256(target) != release.sha256) {
+        if (!UpdateSecurity.isAllowedApkSize(target.length()) || sha256(target) != release.sha256) {
             target.delete()
             throw IOException("ตรวจสอบ SHA-256 ไม่ผ่าน ไฟล์อัปเดตถูกปฏิเสธ")
         }
