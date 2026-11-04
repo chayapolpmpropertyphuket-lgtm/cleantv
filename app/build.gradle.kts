@@ -9,7 +9,9 @@ android {
     namespace = "com.cleantv.launcher"
     compileSdk = 34
     defaultConfig {
-        applicationId = "com.cleantv.launcher"
+        // แพ็กเกจแยกเพื่อให้ติดตั้งทดสอบคู่กับ CleanTV เดิมได้
+        // ห้ามเปลี่ยนกลับเป็น com.cleantv.launcher จนกว่าจะมีแผนย้ายแอปที่ผ่านการทดสอบ
+        applicationId = "com.cleantv.launcher.preview"
         minSdk = 24
         targetSdk = 34
         versionCode = releaseVersionCode
