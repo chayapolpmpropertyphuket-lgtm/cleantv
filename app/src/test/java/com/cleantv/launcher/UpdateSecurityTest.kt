@@ -13,6 +13,7 @@ class UpdateSecurityTest {
         assertNull(UpdateSecurity.parseVersionCode("latest"))
         assertNull(UpdateSecurity.parseVersionCode("v7-beta"))
         assertNull(UpdateSecurity.parseVersionCode("v"))
+        assertNull(UpdateSecurity.parseVersionCode("v0"))
         assertNull(UpdateSecurity.parseVersionCode("v999999999999999999999"))
     }
 
