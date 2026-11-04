@@ -41,6 +41,18 @@ jobs:
       - name: Run updater unit tests
         run: gradle testReleaseUnitTest --no-daemon -PversionCode=${{ github.run_number }}
 
+      - name: Run Android Lint
+        run: gradle lintRelease --no-daemon -PversionCode=${{ github.run_number }}
+
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CleanTV-${{ github.run_number }}-lint-report
+          path: app/build/reports/lint-results-release.html
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Build APK
         run: gradle assembleRelease --no-daemon -PversionCode=${{ github.run_number }}
 
