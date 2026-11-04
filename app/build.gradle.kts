@@ -17,6 +17,17 @@ android {
         versionName = "3.0.$releaseVersionCode"
     }
 
+    // ระบุ signing key โดยตรง ไม่ใช้ debug signing config อัตโนมัติ
+    // เพื่อรักษา certificate เดิมของแอปที่ติดตั้งอยู่
+    signingConfigs {
+        create("cleantvRelease") {
+            storeFile = rootProject.file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -25,8 +36,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // ใช้ signing key เดิมเพื่อให้อัปเดตทับ CleanTV ที่ติดตั้งอยู่ได้
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("cleantvRelease")
         }
     }
 
