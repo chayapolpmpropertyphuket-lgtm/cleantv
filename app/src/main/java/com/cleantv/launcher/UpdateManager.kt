@@ -115,9 +115,21 @@ object UpdateManager {
     }
 
     private fun downloadAndVerify(context: Context, release: UpdateRelease): File {
-        val folder = File(context.cacheDir, "updates").apply { mkdirs() }
+        if (release.versionCode <= 0 ||
+            !UpdateSecurity.isAllowedReleaseUrl(release.downloadUrl) ||
+            UpdateSecurity.normalizeSha256(release.sha256) != release.sha256
+        ) {
+            throw IOException("ข้อมูลอัปเดตไม่ผ่านการตรวจสอบ")
+        }
+
+        val folder = File(context.cacheDir, "updates")
+        if (!folder.isDirectory && !folder.mkdirs()) {
+            throw IOException("ไม่สามารถเตรียมพื้นที่เก็บไฟล์อัปเดตได้")
+        }
         val target = File(folder, "CleanTV-v${release.versionCode}.apk")
-        if (target.exists() && sha256(target) == release.sha256) return target
+        if (target.exists() && UpdateSecurity.isAllowedApkSize(target.length()) &&
+            sha256(target) == release.sha256
+        ) return target
         target.delete()
 
         val connection = (URL(release.downloadUrl).openConnection() as HttpURLConnection).apply {
