@@ -8,7 +8,6 @@ val releaseVersionCode = providers.gradleProperty("versionCode").orNull?.toIntOr
 android {
     namespace = "com.cleantv.launcher"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.cleantv.launcher"
         minSdk = 24
@@ -16,36 +15,27 @@ android {
         versionCode = releaseVersionCode
         versionName = "3.0.$releaseVersionCode"
     }
-
-    // ระบุ signing key โดยตรง ไม่ใช้ debug signing config อัตโนมัติ
-    // เพื่อรักษา certificate เดิมของแอปที่ติดตั้งอยู่
     signingConfigs {
         create("cleantvRelease") {
-            storeFile = rootProject.file("keystore/debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            storeFile = rootProject.file("keystore/cleantv-release.jks")
+            storePassword = providers.environmentVariable("CLEANTV_STORE_PASSWORD").orNull ?: ""
+            keyAlias = providers.environmentVariable("CLEANTV_KEY_ALIAS").orNull ?: ""
+            keyPassword = providers.environmentVariable("CLEANTV_KEY_PASSWORD").orNull ?: ""
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("cleantvRelease")
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-
     lint {
         checkReleaseBuilds = true
         abortOnError = true
