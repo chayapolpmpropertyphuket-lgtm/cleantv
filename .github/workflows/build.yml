@@ -6,6 +6,8 @@ on:
     paths-ignore:
       - 'images/**'
       - '**.md'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -30,32 +32,30 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      # สร้างกุญแจเซ็นแอปครั้งแรกครั้งเดียว แล้วใช้กุญแจเดิมตลอด
-      # เพื่อให้ติดตั้งเวอร์ชันใหม่ทับเวอร์ชันเก่าได้
-      - name: Fixed signing key
+      # ต้องใช้ key เดิมเพื่อรักษาความสามารถในการอัปเดตทับรุ่นที่ผู้ใช้ติดตั้งอยู่
+      - name: Load existing signing key
         run: |
+          test -f keystore/debug.keystore || (echo "Missing existing signing key; refusing to create a different key" && exit 1)
           mkdir -p ~/.android
-          if [ ! -f keystore/debug.keystore ]; then
-            mkdir -p keystore
-            keytool -genkeypair -keystore keystore/debug.keystore \
-              -storepass android -alias androiddebugkey -keypass android \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -dname "CN=Android Debug,O=Android,C=US"
-            git config user.name "github-actions"
-            git config user.email "github-actions@users.noreply.github.com"
-            git add keystore/debug.keystore
-            git commit -m "Add signing key [skip ci]"
-            git push
-          fi
           cp keystore/debug.keystore ~/.android/debug.keystore
 
       - name: Build APK
-        run: gradle assembleRelease --no-daemon
+        run: gradle assembleRelease --no-daemon -PversionCode=${{ github.run_number }}
 
       - name: Rename APK
         run: cp app/build/outputs/apk/release/app-release.apk CleanTV.apk
 
-      - uses: softprops/action-gh-release@v2
+      - name: Upload test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CleanTV-${{ github.run_number }}-apk
+          path: CleanTV.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish GitHub Release
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: CleanTV build ${{ github.run_number }}
