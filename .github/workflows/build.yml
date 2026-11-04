@@ -36,6 +36,9 @@ jobs:
       - name: Load existing signing key
         run: |
           test -f keystore/debug.keystore || (echo "Missing existing signing key; refusing to create a different key" && exit 1)
+          # Fail early if the committed key or expected alias is unavailable.
+          keytool -list -v -keystore keystore/debug.keystore \
+            -storepass android -alias androiddebugkey
           mkdir -p ~/.android
           cp keystore/debug.keystore ~/.android/debug.keystore
 
