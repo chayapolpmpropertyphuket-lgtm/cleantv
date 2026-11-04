@@ -10,12 +10,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -32,12 +31,15 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      # ต้องใช้ key เดิมเพื่อรักษาความสามารถในการอัปเดตทับรุ่นที่ผู้ใช้ติดตั้งอยู่
+      # Keep the current signing identity until a tested key migration is planned.
       - name: Load existing signing key
         run: |
           test -f keystore/debug.keystore || (echo "Missing existing signing key; refusing to create a different key" && exit 1)
           mkdir -p ~/.android
           cp keystore/debug.keystore ~/.android/debug.keystore
+
+      - name: Run updater unit tests
+        run: gradle testReleaseUnitTest --no-daemon -PversionCode=${{ github.run_number }}
 
       - name: Build APK
         run: gradle assembleRelease --no-daemon -PversionCode=${{ github.run_number }}
@@ -53,11 +55,22 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  publish-release:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: CleanTV-${{ github.run_number }}-apk
+          path: release-assets
+
       - name: Publish GitHub Release
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: CleanTV build ${{ github.run_number }}
           generate_release_notes: true
-          files: CleanTV.apk
+          files: release-assets/CleanTV.apk
