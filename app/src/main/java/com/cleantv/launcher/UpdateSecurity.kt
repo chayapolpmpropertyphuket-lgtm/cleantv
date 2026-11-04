@@ -7,7 +7,7 @@ internal object UpdateSecurity {
     private val sha256Pattern = Regex("^[a-f0-9]{64}$")
 
     fun parseVersionCode(tag: String): Int? =
-        Regex("^v?(\\d+)$").matchEntire(tag)?.groupValues?.get(1)?.toIntOrNull()
+        Regex("^v?(\\d+)$").matchEntire(tag)?.groupValues?.get(1)?.toIntOrNull()?.takeIf { it > 0 }
 
     fun normalizeSha256(value: String): String? {
         val digest = value.removePrefix("sha256:").lowercase()
