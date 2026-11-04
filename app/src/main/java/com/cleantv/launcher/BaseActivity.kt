@@ -6,10 +6,12 @@ import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -34,6 +36,49 @@ abstract class BaseActivity : Activity() {
 
     protected fun toast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+    }
+
+
+    protected fun promptUpdate(release: UpdateRelease) {
+        val notes = release.notes.takeIf { it.isNotBlank() } ?: "ปรับปรุงประสิทธิภาพและแก้ไขข้อผิดพลาด"
+        dialog().setTitle("มีอัปเดต CleanTV ${release.versionName}")
+            .setMessage("เวอร์ชันใหม่พร้อมใช้งาน\n\n$notes")
+            .setPositiveButton("อัปเดตตอนนี้") { _, _ -> startUpdate(release) }
+            .setNegativeButton("ภายหลัง", null)
+            .show()
+    }
+
+    protected fun startUpdate(release: UpdateRelease) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !packageManager.canRequestPackageInstalls()) {
+            dialog().setTitle("ต้องอนุญาตการติดตั้ง")
+                .setMessage("โปรดอนุญาตให้ CleanTV ติดตั้งการอัปเดตจากแหล่งนี้ แล้วกลับมากดอัปเดตอีกครั้ง")
+                .setPositiveButton("เปิดการตั้งค่า") { _, _ ->
+                    safeStart(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName")))
+                }
+                .setNegativeButton("ยกเลิก", null)
+                .show()
+            return
+        }
+
+        val progress = dialog().setTitle("กำลังอัปเดต CleanTV")
+            .setMessage("กำลังดาวน์โหลด ตรวจสอบไฟล์ และเตรียมติดตั้ง...")
+            .setCancelable(false)
+            .create()
+        progress.show()
+        worker.execute {
+            val error = try {
+                UpdateManager.installLatest(this, release)
+                null
+            } catch (e: Throwable) {
+                e.message ?: e.javaClass.simpleName
+            }
+            main.post {
+                if (!isFinishing) {
+                    progress.dismiss()
+                    if (error != null) toast("อัปเดตไม่สำเร็จ: $error")
+                }
+            }
+        }
     }
 
     protected fun safeStart(intent: Intent) {
