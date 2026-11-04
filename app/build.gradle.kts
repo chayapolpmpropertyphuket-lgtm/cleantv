@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val releaseVersionCode = providers.gradleProperty("versionCode").orNull?.toIntOrNull() ?: 5
+
 android {
     namespace = "com.cleantv.launcher"
     compileSdk = 34
@@ -11,8 +13,8 @@ android {
         applicationId = "com.cleantv.launcher"
         minSdk = 24
         targetSdk = 34
-        versionCode = 5
-        versionName = "3.0"
+        versionCode = releaseVersionCode
+        versionName = "3.0.$releaseVersionCode"
     }
 
     buildTypes {
@@ -23,6 +25,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // ใช้ signing key เดิมเพื่อให้อัปเดตทับ CleanTV ที่ติดตั้งอยู่ได้
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -33,7 +36,6 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
 
-    // ไม่ให้คำเตือนของ Lint ทำให้ Build ล้มบนเซิร์ฟเวอร์
     lint {
         checkReleaseBuilds = false
         abortOnError = false
