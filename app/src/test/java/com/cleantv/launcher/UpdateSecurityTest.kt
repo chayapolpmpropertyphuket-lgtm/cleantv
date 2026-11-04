@@ -37,6 +37,12 @@ class UpdateSecurityTest {
         assertFalse(UpdateSecurity.isAllowedReleaseUrl(
             "https://github.com/another/repo/releases/download/v7/CleanTV.apk"
         ))
+        assertFalse(UpdateSecurity.isAllowedReleaseUrl(
+            "https://github.com:8443/chayapolpmpropertyphuket-lgtm/cleantv/releases/download/v7/CleanTV.apk"
+        ))
+        assertFalse(UpdateSecurity.isAllowedReleaseUrl(
+            "https://github.com@evil.example/chayapolpropertyphuket-lgtm/cleantv/releases/download/v7/CleanTV.apk"
+        ))
     }
 
     @Test fun redirectMustUseHttpsAndTrustedGitHubAssetHost() {
