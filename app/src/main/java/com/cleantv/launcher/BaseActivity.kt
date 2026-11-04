@@ -42,7 +42,7 @@ abstract class BaseActivity : Activity() {
     protected fun promptUpdate(release: UpdateRelease) {
         val notes = release.notes.takeIf { it.isNotBlank() } ?: "ปรับปรุงประสิทธิภาพและแก้ไขข้อผิดพลาด"
         dialog().setTitle("มีอัปเดต CleanTV ${release.versionName}")
-            .setMessage("เวอร์ชันใหม่พร้อมใช้งาน\\n\\n$notes")
+            .setMessage("เวอร์ชันใหม่พร้อมใช้งาน\n\n$notes")
             .setPositiveButton("อัปเดตตอนนี้") { _, _ -> startUpdate(release) }
             .setNegativeButton("ภายหลัง", null)
             .show()
