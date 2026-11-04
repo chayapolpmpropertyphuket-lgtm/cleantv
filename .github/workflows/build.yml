@@ -16,20 +16,21 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
         with:
           packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.7'
+          cache-provider: basic
 
       # Keep the current signing identity until a tested key migration is planned.
       - name: Load existing signing key
@@ -46,7 +47,7 @@ jobs:
 
       - name: Upload lint report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: CleanTV-${{ github.run_number }}-lint-report
           path: app/build/reports/lint-results-release.html
@@ -60,7 +61,7 @@ jobs:
         run: cp app/build/outputs/apk/release/app-release.apk CleanTV.apk
 
       - name: Upload test APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: CleanTV-${{ github.run_number }}-apk
           path: CleanTV.apk
@@ -74,7 +75,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: CleanTV-${{ github.run_number }}-apk
           path: release-assets
